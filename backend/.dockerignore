@@ -1,0 +1,9 @@
+build/
+.gradle/
+.idea/
+.kotlin/
+*.iml
+*.iws
+*.ipr
+.gitignore
+README.md
