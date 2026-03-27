@@ -1,0 +1,71 @@
+services:
+  db:
+    image: postgres:16.1
+    container_name: freiraumbande-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - appnet
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    ports:
+      - "8081:8080"
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: freiraumbande-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - appnet
+
+  frontend:
+    ports:
+      - ${PORT}
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: freiraumbande-frontend
+    depends_on:
+      - backend
+    networks:
+      - appnet
+
+  adminer:
+    image: adminer:4
+    ports:
+      - "8082:8080"
+    container_name: freiraumbande-adminer
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - appnet
+
+volumes:
+  db_data:
+
+networks:
+  appnet:
+    driver: bridge

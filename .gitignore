@@ -57,7 +57,7 @@ bin/
 # ===========================
 # Docker
 # ===========================
-nginx/certbot/
+src/nginx/certbot/
 
 # ===========================
 # Umgebungsvariablen (NIE committen!)
