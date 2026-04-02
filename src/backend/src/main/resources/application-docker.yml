@@ -1,3 +1,6 @@
 spring:
   flyway:
     enabled: false
+
+file:
+  upload-dir: ${UPLOAD_DIR:/app/uploads}

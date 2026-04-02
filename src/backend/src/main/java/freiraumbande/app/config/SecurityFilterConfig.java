@@ -33,8 +33,10 @@ public class SecurityFilterConfig {
                                 "/api/health",
                                 "/api/docs")
                         .permitAll()
-                        // Events öffentlich lesbar
+                        // Events und Gallery öffentlich lesbar
                         .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/gallery", "/api/gallery/**").permitAll()
+                        .requestMatchers("/api/uploads/**").permitAll()
                         // Alle anderen /api/** Endpunkte erfordern Authentifizierung (Admin-JWT)
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
