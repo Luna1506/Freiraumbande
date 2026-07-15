@@ -26,7 +26,7 @@ public class GalleryServiceImpl implements GalleryService {
             GalleryRepository galleryRepository,
             @Value("${file.upload-dir:./uploads}") String uploadDir) throws IOException {
         this.galleryRepository = galleryRepository;
-        this.uploadPath = Paths.get(uploadDir, "gallery");
+        this.uploadPath = Paths.get(uploadDir, "gallery").toAbsolutePath().normalize();
         Files.createDirectories(this.uploadPath);
     }
 

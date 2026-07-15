@@ -1,11 +1,21 @@
 import { Link } from 'react-router-dom'
 import { useEvents } from '../hooks/useEvents'
+import { useContent } from '../hooks/useContent'
 import { EventCard } from '../components/features/EventCard'
 import { GlassCard } from '../components/ui/GlassCard'
 import { GlassButton } from '../components/ui/GlassButton'
 
+const FEATURE_ICONS = ['🏆', '⚽', '👥']
+
 export function Home() {
   const { events, loading } = useEvents(true)
+  const { text } = useContent()
+
+  const features = FEATURE_ICONS.map((icon, i) => ({
+    icon,
+    title: text(`home.feature${i + 1}.title`),
+    text: text(`home.feature${i + 1}.text`),
+  }))
 
   return (
     <div>
@@ -13,7 +23,6 @@ export function Home() {
       <section className="relative flex flex-col items-center justify-center text-center px-4 py-24">
 
         <div className="max-w-3xl mx-auto" style={{ position: 'relative', zIndex: 1 }}>
-          {/* "KICKER CLUB" — lesbarer */}
           <p style={{
             color: 'rgba(255,255,255,0.85)',
             fontSize: '0.75rem',
@@ -23,7 +32,7 @@ export function Home() {
             marginBottom: '1rem',
             textShadow: '0 1px 8px rgba(0,0,0,0.8)',
           }}>
-            Kicker Club
+            {text('home.kicker')}
           </p>
 
           <h1
@@ -35,11 +44,11 @@ export function Home() {
                 width: '100%',
               }}
           >
-            Freiraumbande
+            {text('home.title')}
           </h1>
 
           <p className="text-lg md:text-xl text-white/75 max-w-lg mx-auto leading-relaxed mb-10 text-shadow">
-            Leidenschaft, Gemeinschaft, Tore. Dein Tischfußball-Club für alle, die Spaß am Spiel haben.
+            {text('home.subtitle')}
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center">
@@ -56,7 +65,7 @@ export function Home() {
       {/* Upcoming events preview */}
       <section className="max-w-4xl mx-auto px-4 py-20">
         <h2 className="font-display text-4xl font-bold text-white uppercase mb-2">
-          Nächste Termine
+          {text('home.eventsTitle')}
         </h2>
         <div className="w-16 h-0.5 bg-white/30 mb-8" />
 
@@ -86,12 +95,8 @@ export function Home() {
       {/* Feature teaser */}
       <section className="max-w-4xl mx-auto px-4 pb-20">
         <div className="grid md:grid-cols-3 gap-4">
-          {[
-            { icon: '🏆', title: 'Turniere', text: 'Regelmäßige Wettkämpfe für alle Spielstärken.' },
-            { icon: '⚽', title: 'Leonhardt-Tische', text: 'Wir spielen auf hochwertigen Leonhardt-Kickern.' },
-            { icon: '👥', title: 'Community', text: 'Über 10 aktive Mitglieder – jeder ist willkommen.' },
-          ].map(item => (
-            <GlassCard key={item.title} className="p-6 text-center">
+          {features.map(item => (
+            <GlassCard key={item.icon} className="p-6 text-center">
               <div className="text-4xl mb-3">{item.icon}</div>
               <h3 className="text-white font-semibold mb-2">{item.title}</h3>
               <p className="text-white/60 text-sm leading-relaxed">{item.text}</p>

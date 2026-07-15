@@ -28,7 +28,9 @@ public class GalleryController {
             GalleryService galleryService,
             @Value("${file.upload-dir:./uploads}") String uploadDir) {
         this.galleryService = galleryService;
-        this.uploadPath = Paths.get(uploadDir, "gallery");
+        // Absolut + normalisiert, sonst schlägt der startsWith-Traversal-Check
+        // bei relativem upload-dir (lokale Entwicklung) für legitime Dateien fehl
+        this.uploadPath = Paths.get(uploadDir, "gallery").toAbsolutePath().normalize();
     }
 
     @GetMapping("/gallery")

@@ -5,6 +5,8 @@ import { GlassCard } from '../components/ui/GlassCard'
 import { GlassButton } from '../components/ui/GlassButton'
 import { EventCard } from '../components/features/EventCard'
 import { AdminEventForm } from '../components/features/AdminEventForm'
+import { AdminContentEditor } from '../components/features/AdminContentEditor'
+import { AdminDesignEditor } from '../components/features/AdminDesignEditor'
 import { ImageGallery } from '../components/features/ImageGallery'
 import { eventService } from '../services/eventService'
 import { galleryService } from '../services/galleryService'
@@ -76,7 +78,7 @@ function Dashboard() {
   const [uploading, setUploading] = useState(false)
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
   const [showNewForm, setShowNewForm] = useState(false)
-  const [activeTab, setActiveTab] = useState<'events' | 'gallery'>('events')
+  const [activeTab, setActiveTab] = useState<'events' | 'gallery' | 'content' | 'design'>('events')
 
   useEffect(() => {
     galleryService.getAll().then(setImages).catch(() => {})
@@ -128,8 +130,13 @@ function Dashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8">
-          {(['events', 'gallery'] as const).map(tab => (
+        <div className="flex flex-wrap gap-2 mb-8">
+          {([
+            ['events', '📅 Termine'],
+            ['gallery', '🖼️ Galerie'],
+            ['content', '📝 Texte'],
+            ['design', '🎨 Design'],
+          ] as const).map(([tab, label]) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -139,7 +146,7 @@ function Dashboard() {
                   : 'text-white/50 hover:text-white hover:bg-white/10'
               }`}
             >
-              {tab === 'events' ? '📅 Termine' : '🖼️ Galerie'}
+              {label}
             </button>
           ))}
         </div>
@@ -207,6 +214,22 @@ function Dashboard() {
               onDelete={handleDeleteImage}
               uploading={uploading}
             />
+          </section>
+        )}
+
+        {/* Content Tab */}
+        {activeTab === 'content' && (
+          <section>
+            <h2 className="text-white font-semibold text-lg mb-4">Texte bearbeiten</h2>
+            <AdminContentEditor />
+          </section>
+        )}
+
+        {/* Design Tab */}
+        {activeTab === 'design' && (
+          <section>
+            <h2 className="text-white font-semibold text-lg mb-4">Design anpassen</h2>
+            <AdminDesignEditor />
           </section>
         )}
       </div>

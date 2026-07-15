@@ -3,6 +3,10 @@ server:
   forward-headers-strategy: framework
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:freiraumbande}
     username: ${DB_USER:postgres}
@@ -38,9 +42,3 @@ admin:
 
 file:
   upload-dir: ${UPLOAD_DIR:./uploads}
-
-spring:
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 15MB

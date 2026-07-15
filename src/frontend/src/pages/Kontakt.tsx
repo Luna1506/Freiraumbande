@@ -1,19 +1,55 @@
 import { FormEvent } from 'react'
+import { useContent } from '../hooks/useContent'
 import { GlassCard } from '../components/ui/GlassCard'
 import { GlassButton } from '../components/ui/GlassButton'
 
 const inputClass =
   'w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white placeholder-white/35 focus:outline-none focus:border-white/45 focus:bg-white/15 transition-colors text-sm'
 
+/** Link nur rendern, wenn eine URL hinterlegt ist — sonst reiner Text ohne Hover-Effekt. */
+function SocialLink({ url, label }: { url: string; label: string }) {
+  if (!url) {
+    return <span className="block text-white/65 text-sm">{label}</span>
+  }
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="block text-white/65 text-sm hover:text-white transition-colors"
+    >
+      {label}
+    </a>
+  )
+}
+
+/** Zeilen im Format "Tag|Uhrzeit" in Zeilenpaare zerlegen. */
+function parseHours(raw: string): { day: string; time: string }[] {
+  return raw
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const [day, time] = line.split('|')
+      return { day: (day ?? '').trim(), time: (time ?? '').trim() }
+    })
+}
+
 export function Kontakt() {
+  const { text } = useContent()
+  const email = text('contact.email')
+  const hours = parseHours(text('contact.hours'))
+  const instagramUrl = text('contact.instagramUrl')
+  const facebookUrl = text('contact.facebookUrl')
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const data = new FormData(e.currentTarget)
     const name = encodeURIComponent(data.get('name') as string)
-    const email = encodeURIComponent(data.get('email') as string)
+    const senderEmail = encodeURIComponent(data.get('email') as string)
     const message = encodeURIComponent(data.get('message') as string)
     window.location.href =
-      `mailto:info@freiraumbande.de?subject=Nachricht%20von%20${name}&body=${message}%0A%0AAntwort%20an%3A%20${email}`
+      `mailto:${email}?subject=Nachricht%20von%20${name}&body=${message}%0A%0AAntwort%20an%3A%20${senderEmail}`
   }
 
   return (
@@ -35,6 +71,7 @@ export function Kontakt() {
                 type="text"
                 name="name"
                 placeholder="Dein Name *"
+                aria-label="Dein Name"
                 required
                 className={inputClass}
               />
@@ -42,12 +79,14 @@ export function Kontakt() {
                 type="email"
                 name="email"
                 placeholder="E-Mail-Adresse *"
+                aria-label="E-Mail-Adresse"
                 required
                 className={inputClass}
               />
               <textarea
                 name="message"
                 placeholder="Deine Nachricht *"
+                aria-label="Deine Nachricht"
                 rows={5}
                 required
                 className={`${inputClass} resize-none`}
@@ -67,9 +106,8 @@ export function Kontakt() {
               <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                 📍 Adresse
               </h3>
-              <p className="text-white/65 text-sm leading-relaxed">
-                Jahnstraße 3a<br />
-                17033 Neubrandenburg
+              <p className="text-white/65 text-sm leading-relaxed whitespace-pre-line">
+                {text('contact.address')}
               </p>
             </GlassCard>
 
@@ -78,32 +116,30 @@ export function Kontakt() {
                 ✉️ E-Mail
               </h3>
               <a
-                href="mailto:info@freiraumbande.de"
+                href={`mailto:${email}`}
                 className="text-white/65 text-sm hover:text-white transition-colors"
               >
-                info@freiraumbande.de
+                {email}
               </a>
             </GlassCard>
 
             <GlassCard className="p-6">
               <h3 className="text-white font-semibold mb-3">🕐 Trainings- und Spielzeiten</h3>
               <div className="text-white/65 text-sm space-y-1">
-                <div className="flex justify-between"><span>Dienstag</span><span>18:00 – 20:00</span></div>
-                <div className="flex justify-between"><span>Mittwoch</span><span>18:00 – 20:00</span></div>
-                <div className="flex justify-between"><span>Donnerstag</span><span>18:00 – 20:00</span></div>
+                {hours.map((h, i) => (
+                  <div key={i} className="flex justify-between">
+                    <span>{h.day}</span>
+                    <span>{h.time}</span>
+                  </div>
+                ))}
               </div>
             </GlassCard>
 
             <GlassCard className="p-6">
               <h3 className="text-white font-semibold mb-3">🌐 Social Media</h3>
               <div className="space-y-2">
-                {/* FUTURE: Replace with real social media links */}
-                <a href="#" className="block text-white/65 text-sm hover:text-white transition-colors">
-                  Instagram → @freiraumbande
-                </a>
-                <a href="#" className="block text-white/65 text-sm hover:text-white transition-colors">
-                  Facebook → Freiraumbande
-                </a>
+                <SocialLink url={instagramUrl} label={`Instagram → ${text('contact.instagram')}`} />
+                <SocialLink url={facebookUrl} label={`Facebook → ${text('contact.facebook')}`} />
               </div>
             </GlassCard>
           </div>

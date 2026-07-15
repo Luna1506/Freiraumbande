@@ -1,14 +1,17 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { AuthProvider } from './hooks/useAuth'
+import { ContentProvider, useContent } from './hooks/useContent'
+import { BACKGROUND_KEY } from './content/defaults'
 import { Navbar } from './components/ui/Navbar'
+import { Footer } from './components/ui/Footer'
 import { Home } from './pages/Home'
 import { UeberUns } from './pages/UeberUns'
 import { Kalender } from './pages/Kalender'
 import { Kontakt } from './pages/Kontakt'
+import { Impressum } from './pages/Impressum'
 import { Admin } from './pages/Admin'
 import heroImg from './assets/hero.jpg'
-import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
 
 function ScrollArrow() {
   const location = useLocation()
@@ -47,67 +50,79 @@ function ScrollArrow() {
   )
 }
 
+/** Vollflächiger Hintergrund — nutzt das im Admin-Panel gesetzte Bild, sonst den Standard. */
+function AppBackground() {
+  const { text } = useContent()
+  const customBackground = text(BACKGROUND_KEY)
+  const backgroundImage = customBackground || heroImg
+
+  return (
+    <>
+      <div
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: -2,
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+      />
+      {/* Dark overlay for readability */}
+      <div
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: -1,
+            background: 'rgba(0,0,0,0.38)',
+          }}
+      />
+    </>
+  )
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        {/* Fixed full-screen background */}
-        <div
-            aria-hidden="true"
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: -2,
-              backgroundImage: `url(${heroImg})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-        />
-        {/* Dark overlay for readability */}
-        <div
-            aria-hidden="true"
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              zIndex: -1,
-              background: 'rgba(0,0,0,0.38)',
-            }}
-        />
+        <ContentProvider>
+          <AppBackground />
+          <Navbar />
 
-        <Navbar />
+          <main style={{ position: 'relative', paddingTop: '80px', paddingBottom: '16px' }}>
+            <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: '80px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '90%',
+                  maxWidth: '1100px',
+                  height: 'calc(100% - 112px)',  // 96px oben + 16px unten
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  borderRadius: '1.5rem',
+                  pointerEvents: 'none',
+                  zIndex: 0,
+                }}
+            />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/ueber-uns" element={<UeberUns />} />
+              <Route path="/kalender" element={<Kalender />} />
+              <Route path="/kontakt" element={<Kontakt />} />
+              <Route path="/impressum" element={<Impressum />} />
+              <Route path="/admin" element={<Admin />} />
+            </Routes>
+          </main>
 
-        <main style={{ position: 'relative', paddingTop: '80px', paddingBottom: '16px' }}>
-          <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                top: '80px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '90%',
-                maxWidth: '1100px',
-                height: 'calc(100% - 112px)',  // 96px oben + 16px unten
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                borderRadius: '1.5rem',
-                pointerEvents: 'none',
-                zIndex: 0,
-              }}
-          />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/ueber-uns" element={<UeberUns />} />
-            <Route path="/kalender" element={<Kalender />} />
-            <Route path="/kontakt" element={<Kontakt />} />
-            <Route path="/admin" element={<Admin />} />
-          </Routes>
-        </main>
-
-        <ScrollArrow />
+          <Footer />
+          <ScrollArrow />
+        </ContentProvider>
       </AuthProvider>
     </BrowserRouter>
   )
