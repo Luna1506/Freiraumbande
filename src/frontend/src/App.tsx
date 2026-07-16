@@ -54,7 +54,30 @@ function ScrollArrow() {
 function AppBackground() {
   const { text } = useContent()
   const customBackground = text(BACKGROUND_KEY)
-  const backgroundImage = customBackground || heroImg
+  // Erst umschalten, wenn das eigene Bild fertig geladen ist — sonst flackert
+  // beim Wechsel vom Standard-Hero eine leere Fläche auf
+  const [readyBackground, setReadyBackground] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!customBackground) return
+    let cancelled = false
+    const img = new Image()
+    img.onload = () => {
+      if (!cancelled) setReadyBackground(customBackground)
+    }
+    img.onerror = () => {
+      // Bild-URL kaputt (z. B. Datei gelöscht) → beim Standard bleiben
+      if (!cancelled) setReadyBackground(null)
+    }
+    img.src = customBackground
+    return () => {
+      cancelled = true
+    }
+  }, [customBackground])
+
+  // Ohne eigenes Bild sofort der Standard; mit eigenem Bild erst nach fertigem
+  // Laden umschalten (bis dahin bleibt das zuletzt sichtbare Bild stehen)
+  const backgroundImage = customBackground && readyBackground ? readyBackground : heroImg
 
   return (
     <>
@@ -64,6 +87,7 @@ function AppBackground() {
             position: 'fixed',
             inset: 0,
             zIndex: -2,
+            backgroundColor: '#10141a', // nie Weiß zeigen, solange ein Bild lädt
             backgroundImage: `url(${backgroundImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',

@@ -6,11 +6,28 @@ import { GlassCard } from '../ui/GlassCard'
 import { GlassButton } from '../ui/GlassButton'
 import heroImg from '../../assets/hero.jpg'
 
+/** Bildmaße auslesen, ohne das Bild hochzuladen. */
+function readImageSize(file: File): Promise<{ width: number; height: number } | null> {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      resolve({ width: img.naturalWidth, height: img.naturalHeight })
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      resolve(null)
+    }
+    img.src = url
+  })
+}
+
 export function AdminDesignEditor() {
   const { text, refresh } = useContent()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState<{ type: 'ok' | 'error'; text: string } | null>(null)
+  const [message, setMessage] = useState<{ type: 'ok' | 'error' | 'warn'; text: string } | null>(null)
 
   const customBackground = text(BACKGROUND_KEY)
   const currentBackground = customBackground || heroImg
@@ -20,9 +37,17 @@ export function AdminDesignEditor() {
     setBusy(true)
     setMessage(null)
     try {
+      const size = await readImageSize(file)
       await contentService.uploadBackground(file)
       await refresh()
-      setMessage({ type: 'ok', text: 'Hintergrund aktualisiert.' })
+      if (size && size.width < 1280) {
+        setMessage({
+          type: 'warn',
+          text: `Hintergrund aktualisiert — aber das Bild ist nur ${size.width} px breit und wirkt auf großen Bildschirmen unscharf. Empfohlen: mindestens 1920 px.`,
+        })
+      } else {
+        setMessage({ type: 'ok', text: 'Hintergrund aktualisiert.' })
+      }
     } catch {
       setMessage({
         type: 'error',
@@ -90,7 +115,15 @@ export function AdminDesignEditor() {
           </GlassButton>
         )}
         {message && (
-          <span className={message.type === 'ok' ? 'text-emerald-300 text-sm' : 'text-red-300 text-sm'}>
+          <span
+            className={
+              message.type === 'ok'
+                ? 'text-emerald-300 text-sm'
+                : message.type === 'warn'
+                  ? 'text-amber-300 text-sm'
+                  : 'text-red-300 text-sm'
+            }
+          >
             {message.text}
           </span>
         )}

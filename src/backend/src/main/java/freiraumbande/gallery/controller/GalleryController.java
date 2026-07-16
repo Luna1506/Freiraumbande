@@ -5,6 +5,7 @@ import freiraumbande.gallery.service.GalleryService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api")
@@ -64,7 +66,11 @@ public class GalleryController {
             MediaType mediaType = contentType != null
                     ? MediaType.parseMediaType(contentType)
                     : MediaType.APPLICATION_OCTET_STREAM;
-            return ResponseEntity.ok().contentType(mediaType).body(resource);
+            return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    // UUID-Dateinamen ändern sich pro Upload → dauerhaft cachebar
+                    .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable())
+                    .body(resource);
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
