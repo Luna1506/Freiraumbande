@@ -25,7 +25,7 @@ function formatTime(timeStr?: string): string {
 
 export function EventCard({ event, isAdmin, onEdit, onDelete }: EventCardProps) {
   return (
-    <GlassCard className="p-5 hover:bg-white/12 transition-colors">
+    <GlassCard className="p-5 hover:after:bg-white/12 after:transition-colors">
       <div className="flex items-start justify-between gap-4">
         {/* Date badge */}
         <div className="flex-shrink-0 text-center glass rounded-xl px-3 py-2 min-w-[56px]">

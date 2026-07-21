@@ -3,8 +3,10 @@ import { useAuth } from '../hooks/useAuth'
 import { useContent } from '../hooks/useContent'
 import { GlassCard } from '../components/ui/GlassCard'
 import { ImageGallery } from '../components/features/ImageGallery'
+import { MemberGrid } from '../components/features/MemberGrid'
 import { galleryService } from '../services/galleryService'
-import { GalleryImage } from '../types'
+import { memberService } from '../services/memberService'
+import { GalleryImage, Member } from '../types'
 
 const VALUE_ICONS = ['🤝', '🎯', '🔥']
 
@@ -12,10 +14,12 @@ export function UeberUns() {
   const { isAuthenticated } = useAuth()
   const { text } = useContent()
   const [images, setImages] = useState<GalleryImage[]>([])
+  const [members, setMembers] = useState<Member[]>([])
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     galleryService.getAll().then(setImages).catch(() => {})
+    memberService.getAll().then(setMembers).catch(() => {})
   }, [])
 
   const handleUpload = async (file: File) => {
@@ -84,6 +88,15 @@ export function UeberUns() {
               <p className="text-white/55 text-sm">{v.text}</p>
             </GlassCard>
           ))}
+        </div>
+
+        {/* Mitglieder — verwaltet wird im Admin-Bereich (Tab „Mitglieder") */}
+        <div className="mb-12">
+          <h2 className="font-display text-3xl font-bold text-white uppercase mb-2">
+            Unsere Mitglieder
+          </h2>
+          <div className="w-16 h-0.5 bg-white/30 mb-6" />
+          <MemberGrid members={members} />
         </div>
 
         {/* Gallery */}

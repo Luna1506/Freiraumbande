@@ -50,7 +50,12 @@ function ScrollArrow() {
   )
 }
 
-/** Vollflächiger Hintergrund — nutzt das im Admin-Panel gesetzte Bild, sonst den Standard. */
+/**
+ * Vollflächiger Hintergrund — nutzt das im Admin-Panel gesetzte Bild, sonst den Standard.
+ * Liegt als background-image direkt auf dem <body> (statt in einem fixed-Div),
+ * weil Firefox fixed positionierte Ebenen nicht in den backdrop-filter der
+ * Glass-Elemente einbezieht — auf dem body blurrt es jeder Browser.
+ */
 function AppBackground() {
   const { text } = useContent()
   const customBackground = text(BACKGROUND_KEY)
@@ -79,33 +84,18 @@ function AppBackground() {
   // Laden umschalten (bis dahin bleibt das zuletzt sichtbare Bild stehen)
   const backgroundImage = customBackground && readyBackground ? readyBackground : heroImg
 
-  return (
-    <>
-      <div
-          aria-hidden="true"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: -2,
-            backgroundColor: '#10141a', // nie Weiß zeigen, solange ein Bild lädt
-            backgroundImage: `url(${backgroundImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-      />
-      {/* Dark overlay for readability */}
-      <div
-          aria-hidden="true"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: -1,
-            background: 'rgba(0,0,0,0.38)',
-          }}
-      />
-    </>
-  )
+  useEffect(() => {
+    // Abdunklungs-Overlay als oberste Verlaufsebene, damit kein extra Div nötig ist
+    document.body.style.backgroundImage =
+      `linear-gradient(rgba(0,0,0,0.38), rgba(0,0,0,0.38)), url(${backgroundImage})`
+    // Dieselbe Bildquelle für die Frosted-Glass-Ebene der Glass-Elemente (siehe index.css)
+    document.documentElement.style.setProperty('--bg-image', `url("${backgroundImage}")`)
+    return () => {
+      document.body.style.backgroundImage = ''
+    }
+  }, [backgroundImage])
+
+  return null
 }
 
 function App() {
@@ -116,7 +106,7 @@ function App() {
           <AppBackground />
           <Navbar />
 
-          <main style={{ position: 'relative', paddingTop: '80px', paddingBottom: '16px' }}>
+          <main style={{ position: 'relative', paddingTop: '80px', paddingBottom: '16px', flex: '1 1 auto' }}>
             <div
                 aria-hidden="true"
                 style={{

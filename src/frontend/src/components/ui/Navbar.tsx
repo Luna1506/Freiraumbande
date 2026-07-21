@@ -52,7 +52,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden glass-nav border-t border-white/10 px-4 py-4 flex flex-col gap-4">
+        <div className="md:hidden glass-nav relative border-t border-white/10 px-4 py-4 flex flex-col gap-4">
           {NAV_LINKS.map(link => (
             <Link
               key={link.to}

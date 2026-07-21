@@ -23,6 +23,15 @@ export interface GalleryImage {
   uploadedAt: string
 }
 
+export interface Member {
+  id: number
+  name: string
+  role?: string
+  /** null, wenn kein Foto hinterlegt ist. */
+  imageUrl: string | null
+  createdAt: string
+}
+
 export interface LoginResponse {
   accessToken: string
 }

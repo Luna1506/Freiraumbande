@@ -6,9 +6,9 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="glass-nav border-t border-white/15 mt-8">
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="grid gap-8 md:grid-cols-3">
+    <footer className="glass-nav relative border-t border-white/15 mt-8">
+      <div className="max-w-6xl mx-auto px-4 py-5">
+        <div className="grid gap-5 md:grid-cols-3">
           {/* Club */}
           <div>
             <p className="font-display text-lg font-bold text-white tracking-widest uppercase mb-2">
@@ -58,7 +58,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="mt-5 pt-3 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-white/40 text-xs">
             © {year} Freiraumbande. Alle Rechte vorbehalten.
           </p>

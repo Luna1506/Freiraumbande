@@ -4,7 +4,7 @@ import { GlassCard } from '../components/ui/GlassCard'
 import { GlassButton } from '../components/ui/GlassButton'
 
 const inputClass =
-  'w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white placeholder-white/35 focus:outline-none focus:border-white/45 focus:bg-white/15 transition-colors text-sm'
+  'liquid-field w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white placeholder-white/35 focus:outline-none focus:border-white/45 focus:bg-white/15 transition-colors text-sm'
 
 /** Link nur rendern, wenn eine URL hinterlegt ist — sonst reiner Text ohne Hover-Effekt. */
 function SocialLink({ url, label }: { url: string; label: string }) {

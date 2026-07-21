@@ -7,13 +7,16 @@ import { EventCard } from '../components/features/EventCard'
 import { AdminEventForm } from '../components/features/AdminEventForm'
 import { AdminContentEditor } from '../components/features/AdminContentEditor'
 import { AdminDesignEditor } from '../components/features/AdminDesignEditor'
+import { AdminMemberForm } from '../components/features/AdminMemberForm'
 import { ImageGallery } from '../components/features/ImageGallery'
+import { MemberGrid } from '../components/features/MemberGrid'
 import { eventService } from '../services/eventService'
 import { galleryService } from '../services/galleryService'
-import { Event, CreateEventRequest, GalleryImage } from '../types'
+import { memberService, MemberFormData } from '../services/memberService'
+import { Event, CreateEventRequest, GalleryImage, Member } from '../types'
 
 const inputClass =
-  'w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/35 focus:outline-none focus:border-white/45 transition-colors'
+  'liquid-field w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/35 focus:outline-none focus:border-white/45 transition-colors'
 
 // ── Login Form ──────────────────────────────────────────────────────────────
 
@@ -78,10 +81,14 @@ function Dashboard() {
   const [uploading, setUploading] = useState(false)
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
   const [showNewForm, setShowNewForm] = useState(false)
-  const [activeTab, setActiveTab] = useState<'events' | 'gallery' | 'content' | 'design'>('events')
+  const [members, setMembers] = useState<Member[]>([])
+  const [editingMember, setEditingMember] = useState<Member | null>(null)
+  const [showNewMemberForm, setShowNewMemberForm] = useState(false)
+  const [activeTab, setActiveTab] = useState<'events' | 'gallery' | 'members' | 'content' | 'design'>('events')
 
   useEffect(() => {
     galleryService.getAll().then(setImages).catch(() => {})
+    memberService.getAll().then(setMembers).catch(() => {})
   }, [])
 
   const handleSaveEvent = async (data: CreateEventRequest) => {
@@ -117,6 +124,24 @@ function Dashboard() {
     setImages(prev => prev.filter(img => img.id !== id))
   }
 
+  const handleSaveMember = async (data: MemberFormData) => {
+    if (editingMember) {
+      const updated = await memberService.update(editingMember.id, data)
+      setMembers(prev => prev.map(m => (m.id === updated.id ? updated : m)))
+      setEditingMember(null)
+    } else {
+      const created = await memberService.create(data)
+      setMembers(prev => [...prev, created])
+      setShowNewMemberForm(false)
+    }
+  }
+
+  const handleDeleteMember = async (id: number) => {
+    if (!confirm('Mitglied wirklich löschen?')) return
+    await memberService.delete(id)
+    setMembers(prev => prev.filter(m => m.id !== id))
+  }
+
   return (
     <div className="min-h-screen pt-24 pb-20">
       <div className="max-w-5xl mx-auto px-4">
@@ -134,6 +159,7 @@ function Dashboard() {
           {([
             ['events', '📅 Termine'],
             ['gallery', '🖼️ Galerie'],
+            ['members', '👥 Mitglieder'],
             ['content', '📝 Texte'],
             ['design', '🎨 Design'],
           ] as const).map(([tab, label]) => (
@@ -213,6 +239,46 @@ function Dashboard() {
               onUpload={handleUpload}
               onDelete={handleDeleteImage}
               uploading={uploading}
+            />
+          </section>
+        )}
+
+        {/* Members Tab */}
+        {activeTab === 'members' && (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-white font-semibold text-lg">Mitglieder verwalten</h2>
+              {!showNewMemberForm && !editingMember && (
+                <GlassButton variant="success" onClick={() => setShowNewMemberForm(true)}>
+                  + Neues Mitglied
+                </GlassButton>
+              )}
+            </div>
+
+            {showNewMemberForm && !editingMember && (
+              <div className="mb-4">
+                <AdminMemberForm
+                  onSave={handleSaveMember}
+                  onCancel={() => setShowNewMemberForm(false)}
+                />
+              </div>
+            )}
+
+            {editingMember && (
+              <div className="mb-4">
+                <AdminMemberForm
+                  member={editingMember}
+                  onSave={handleSaveMember}
+                  onCancel={() => setEditingMember(null)}
+                />
+              </div>
+            )}
+
+            <MemberGrid
+              members={members}
+              isAdmin
+              onEdit={m => { setEditingMember(m); setShowNewMemberForm(false) }}
+              onDelete={handleDeleteMember}
             />
           </section>
         )}
